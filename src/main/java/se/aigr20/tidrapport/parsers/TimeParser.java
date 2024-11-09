@@ -11,6 +11,7 @@ import se.aigr20.tidrapport.tokens.Token;
 
 public final class TimeParser implements Parser<Token.Time> {
 
+  private static final DateTimeFormatter FALLBACK_PATTERN = DateTimeFormatter.ofPattern("H:mm");
   private final CharacterByCharacterReader reader;
   private final StringBuilder buffer;
 
@@ -29,7 +30,11 @@ public final class TimeParser implements Parser<Token.Time> {
 
     final LocalTime time;
     try {
-      time = LocalTime.parse(buffer, DateTimeFormatter.ISO_LOCAL_TIME);
+      if (buffer.length() > 4) {
+        time = LocalTime.parse(buffer, DateTimeFormatter.ISO_LOCAL_TIME);
+      } else {
+        time = LocalTime.parse(buffer, FALLBACK_PATTERN);
+      }
       buffer.setLength(0);
     } catch (final DateTimeParseException e) {
       throw new ParseException("%s kan inte tolkas som en tid".formatted(buffer), e);
