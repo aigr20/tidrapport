@@ -26,6 +26,8 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
   private final List<Token<?>> tokens;
   private int line;
   private int pos;
+  private int resetLine;
+  private int resetPos;
 
   public TidrapportParser(final String file) throws IOException {
     reader = Files.newBufferedReader(Path.of(file));
@@ -40,22 +42,18 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
   }
 
   public List<Token<?>> parse() throws IOException {
-    try {
-      int preSize;
-      do {
-        preSize = tokens.size();
+    while (true) {
+      try {
         tokens.add(weekParser.parse());
         skipWhitespace();
         parseDaysInWeek();
-      } while (preSize < tokens.size());
-    } catch (ParseException e) {
-      System.err.printf("Fel på rad %d position %d%n%s%n", line, pos, e.getMessage());
-      return tokens;
-    } catch (final EOFException e) {
-      return tokens;
+      } catch (ParseException e) {
+        System.err.printf("Fel på rad %d position %d%n%s%n", line, pos, e.getMessage());
+        return tokens;
+      } catch (final EOFException e) {
+        return tokens;
+      }
     }
-
-    return tokens;
   }
 
   @Override
@@ -103,32 +101,40 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
   private void skipWhitespace() throws IOException {
     var foundNonWhitespace = false;
     while (!foundNonWhitespace) {
-      final int oldLine = line;
-      final int oldPos = pos;
-      reader.mark(1);
+      mark();
       var read = nextCharacter();
       if (!Character.isWhitespace(read)) {
-        reader.reset();
-        line = oldLine;
-        pos = oldPos;
+        rewind();
         foundNonWhitespace = true;
       }
     }
   }
 
   private char peek() throws IOException {
-    reader.mark(1);
+    mark();
     var read = nextCharacter();
-    reader.reset();
+    rewind();
     return read;
   }
 
   private void skipDelimiter(final char delimiter) throws IOException {
-    reader.mark(1);
+    mark();
     var read = nextCharacter();
     if (read == delimiter) {
       return;
     }
+    rewind();
+  }
+
+  private void mark() throws IOException {
+    reader.mark(1);
+    resetLine = line;
+    resetPos = pos;
+  }
+
+  private void rewind() throws IOException {
     reader.reset();
+    line = resetLine;
+    pos = resetPos;
   }
 }

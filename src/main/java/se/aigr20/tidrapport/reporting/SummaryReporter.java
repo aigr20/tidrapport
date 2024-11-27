@@ -20,7 +20,12 @@ public class SummaryReporter implements Reporter {
 
   @Override
   public void report() {
-    calculateWeeklyReports();
+    try {
+      calculateWeeklyReports();
+    } catch (final Exception e) {
+      System.out.println("Stötte på ett fel: " + e.getMessage());
+      System.out.println("Inläst rapport hittills: ");
+    }
     weeklyReports.forEach(Reporter::report);
   }
 
@@ -40,8 +45,7 @@ public class SummaryReporter implements Reporter {
             final var duration = Duration.between(startTime.getValue(), endTime.getValue());
             currentDayReporter.addActivity(activity.getValue(), duration);
           } catch (final NoSuchElementException | ClassCastException e) {
-            System.err.println("Kunde inte hämta tider för aktiviteten " + activity.getValue());
-            throw e;
+            throw new IllegalStateException("Kunde inte hämta tider för aktiviteten " + activity.getValue(), e);
           }
         }
         case Token.Time ignored -> throw new IllegalStateException("Tid skall endast läsas när aktiviteter hanteras.");
