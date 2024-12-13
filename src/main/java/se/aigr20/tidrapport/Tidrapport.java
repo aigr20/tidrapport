@@ -1,27 +1,35 @@
 package se.aigr20.tidrapport;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import se.aigr20.tidrapport.reporting.ReporterOptions;
 import se.aigr20.tidrapport.reporting.SummaryReporter;
 import se.aigr20.tidrapport.tokens.Token;
 
 public class Tidrapport {
-  private static final String USAGE = "tidrapport <fil> [--debug --help -h]";
+  private static final String USAGE = "tidrapport <fil> [--help -h --debug --exclude-from-sum]";
   private static boolean help = false;
   private static boolean debug = false;
   private static String file = null;
+  private static List<String> activitiesExcludedFromSum = List.of();
 
   public static void handleArgs(final String[] args) {
     for (final var arg : args) {
-      switch (arg) {
-        case "--help", "-h" -> help = true;
-        case "--debug" -> debug = true;
-        default -> {
-          if (file != null) {
-            throw new IllegalArgumentException("Oväntat argument och tidrapportsfil är redan satt: " + arg);
-          }
-          file = arg;
+      if (arg.equals("--help") || arg.equals("-h")) {
+        help = true;
+      } else if (arg.equals("--debug")) {
+        debug = true;
+      } else if (arg.startsWith("--exclude-from-sum=")) {
+        final var excluded = new ArrayList<String>();
+        Collections.addAll(excluded, arg.split("=")[1].split(","));
+        activitiesExcludedFromSum = excluded;
+      } else {
+        if (file != null) {
+          throw new IllegalArgumentException("Oväntat argument och tidrapportsfil är redan satt: " + arg);
         }
+        file = arg;
       }
     }
   }
@@ -48,6 +56,6 @@ public class Tidrapport {
     }
 
     final var reporter = new SummaryReporter(tokens);
-    reporter.report();
+    reporter.report(new ReporterOptions(activitiesExcludedFromSum));
   }
 }

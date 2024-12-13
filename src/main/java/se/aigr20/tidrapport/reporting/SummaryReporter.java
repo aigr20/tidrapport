@@ -19,14 +19,16 @@ public class SummaryReporter implements Reporter {
   }
 
   @Override
-  public void report() {
+  public void report(final ReporterOptions options) {
     try {
       calculateWeeklyReports();
     } catch (final Exception e) {
       System.out.println("Stötte på ett fel: " + e.getMessage());
       System.out.println("Inläst rapport hittills: ");
     }
-    weeklyReports.forEach(Reporter::report);
+    for (final var weeklyReport : weeklyReports) {
+      weeklyReport.report(options);
+    }
   }
 
   private void calculateWeeklyReports() {

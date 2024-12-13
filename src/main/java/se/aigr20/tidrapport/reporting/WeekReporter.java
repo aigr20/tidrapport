@@ -28,9 +28,15 @@ public class WeekReporter implements Reporter {
   }
 
   @Override
-  public void report() {
+  public void report(final ReporterOptions options) {
+    var weekSum = 0d;
+
     System.out.println("Vecka " + week);
     reports.sort(Comparator.comparing(DayReporter::getDay));
-    reports.forEach(Reporter::report);
+    for (final var report : reports) {
+      report.report(options);
+      weekSum += report.totalMinutes(options.excludeFromSum());
+    }
+    System.out.printf("Totalt vecka %d: %.2fh%n", week, weekSum);
   }
 }
