@@ -39,4 +39,8 @@ public class WeekReporter implements Reporter {
     }
     System.out.printf("Totalt vecka %d: %.2fh%n", week, weekSum);
   }
+
+  public int getWeek() {
+    return week;
+  }
 }

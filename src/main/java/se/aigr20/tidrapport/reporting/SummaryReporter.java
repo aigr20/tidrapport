@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import se.aigr20.tidrapport.tokens.Token;
 
@@ -26,9 +27,24 @@ public class SummaryReporter implements Reporter {
       System.out.println("Stötte på ett fel: " + e.getMessage());
       System.out.println("Inläst rapport hittills: ");
     }
+
+    final var weekToReport = options.getWeekOnlyReport();
+    if (weekToReport.isPresent()) {
+      final var report = findSingleWeekReport(weekToReport.getAsInt());
+      if (report.isEmpty()) {
+        throw new NullPointerException("Ingen rapport för vecka %d finns.".formatted(weekToReport.getAsInt()));
+      }
+      report.get().report(options);
+      return;
+    }
+
     for (final var weeklyReport : weeklyReports) {
       weeklyReport.report(options);
     }
+  }
+
+  private Optional<WeekReporter> findSingleWeekReport(final int week) {
+    return weeklyReports.stream().filter(report -> report.getWeek() == week).findFirst();
   }
 
   private void calculateWeeklyReports() {
