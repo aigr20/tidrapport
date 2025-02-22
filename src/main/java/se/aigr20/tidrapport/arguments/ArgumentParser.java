@@ -41,9 +41,12 @@ public class ArgumentParser<T> {
           throw new IllegalArgumentException(
                   "Multiple converters specified for " + argumentClass.getName() + "." + field.getName());
         }
+
         final var namedField = new NamedArgument.Field(field, annotation);
         namedArgumentFields.add(namedField);
-        argumentNames.add(namedField.tryLongName());
+        if (namedField.tryLongName() != null) {
+          argumentNames.add(namedField.tryLongName());
+        }
         if (namedField.tryShortName() != null) {
           argumentNames.add(namedField.tryShortName());
         }
@@ -62,13 +65,68 @@ public class ArgumentParser<T> {
 
   public T parse() {
     try {
-      parseNamedArguments();
-      parsePositionalArguments();
+      if (parseNamedArguments()) {
+        parsePositionalArguments();
+      }
     } catch (final IllegalAccessException e) {
       throw new IllegalStateException("Unable to access a field in " + argumentClassInstance.getClass().getName(), e);
     }
 
     return argumentClassInstance;
+  }
+
+  /**
+   * Skapa en hjälptext lämplig för en -h/--help-parameter utifrån de argument som registrerats.
+   *
+   * @param command Namnet på kommandot som kör programmet.
+   * @param version Programmets version. Kan vara null.
+   * @return En text som beskriver alla parametrar.
+   */
+  public String createHelpMessage(final String command, final String version) {
+    final var sb = new StringBuilder();
+    if (version != null) {
+      sb.append(command).append(" version ").append(version).append("\n\n");
+    }
+    sb.append("Användning: ").append(command).append(" ");
+    if (!namedArgumentFields.isEmpty()) {
+      sb.append("[alternativ...]");
+    }
+    if (!positionalArgumentFields.isEmpty()) {
+      for (final var positionalArgument : positionalArgumentFields) {
+        sb.append(" ").append('<').append(positionalArgument.field().getName()).append('>');
+      }
+    }
+
+    final var nameColumn = new ArrayList<String>(namedArgumentFields.size());
+    final var descriptionColumn = new ArrayList<String>(namedArgumentFields.size());
+    populateOptionsColumns(nameColumn, descriptionColumn);
+
+    final var maxNameLen = nameColumn.stream().mapToInt(String::length).max().orElse(0);
+    for (int i = 0; i < namedArgumentFields.size(); i++) {
+      final var name = nameColumn.get(i);
+      sb.append("\n").append(name).append(" ".repeat(maxNameLen - name.length() + 2)).append(descriptionColumn.get(i));
+    }
+
+    return sb.toString();
+  }
+
+  private void populateOptionsColumns(final List<String> nameColumn, final List<String> descriptionColumn) {
+    for (final var namedArgument : namedArgumentFields) {
+      final var sb = new StringBuilder();
+      if (namedArgument.tryShortName() != null) {
+        sb.append('-').append(namedArgument.tryShortName());
+      }
+      if (namedArgument.tryLongName() != null) {
+        if (namedArgument.tryShortName() != null) {
+          sb.append(", ");
+        }
+        sb.append("--").append(namedArgument.tryLongName());
+      }
+
+      sb.append(" <").append(namedArgument.field().getType().getSimpleName()).append('>');
+      nameColumn.add(sb.toString());
+      descriptionColumn.add(namedArgument.annotation().description());
+    }
   }
 
   private void parsePositionalArguments() throws IllegalAccessException {
@@ -83,7 +141,13 @@ public class ArgumentParser<T> {
     }
   }
 
-  private void parseNamedArguments() throws IllegalAccessException {
+  /**
+   * Läs in namngivna argument.
+   *
+   * @return Om inläsning skall fortsätta efter inläsning av namngivna argument.
+   * @throws IllegalAccessException Om åtkomst genom reflection misslyckas.
+   */
+  private boolean parseNamedArguments() throws IllegalAccessException {
     for (final var argument : namedArgumentFields) {
       argument.field().setAccessible(true);
       final var type = argument.field().getType();
@@ -104,7 +168,13 @@ public class ArgumentParser<T> {
                fieldValue);
 
       argument.field().setAccessible(false);
+
+      if (argument.annotation().stopsParsing()) {
+        return false;
+      }
     }
+
+    return true;
   }
 
   private void setField(final Field field,
@@ -136,18 +206,13 @@ public class ArgumentParser<T> {
   }
 
   private String getNamedFieldValue(final NamedArgument.Field argument) {
-    String fieldValue;
-    if ((argument.field().getType() == boolean.class || argument.field().getType() == Boolean.class) &&
-        argument.annotation().converter().length == 0) {
-      fieldValue = getNamedFieldValue("--" + argument.tryLongName(), true);
-      if (fieldValue == null && argument.tryShortName() != null) {
-        fieldValue = getNamedFieldValue("-" + argument.tryShortName(), true);
-      }
-    } else {
-      fieldValue = getNamedFieldValue("--" + argument.tryLongName(), false);
-      if (fieldValue == null && argument.tryShortName() != null) {
-        fieldValue = getNamedFieldValue("-" + argument.tryShortName(), false);
-      }
+    String fieldValue = null;
+
+    if (argument.tryLongName() != null) {
+      fieldValue = getNamedFieldValue("--" + argument.tryLongName(), argument.isBooleanField());
+    }
+    if (fieldValue == null && argument.tryShortName() != null) {
+      fieldValue = getNamedFieldValue("-" + argument.tryShortName(), argument.isBooleanField());
     }
 
     if (fieldValue == null && argument.annotation().required()) {

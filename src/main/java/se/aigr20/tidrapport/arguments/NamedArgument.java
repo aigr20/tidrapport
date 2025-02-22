@@ -35,19 +35,44 @@ public @interface NamedArgument {
   boolean required() default false;
 
   /**
+   * Beskrivning av argumentet.
+   *
+   * @return Beskrivning.
+   */
+  String description() default "";
+
+  /**
    * En klass som kan konvertera ett argument till rätt typ.
    *
    * @return Klassen som skall användas för att konvertera värdet.
    */
   Class<? extends ArgumentConverter<?>>[] converter() default {};
 
+  /**
+   * Om detta namngivna argument påträffas skall inläsning av övriga argument omedelbart avbrytas.
+   *
+   * @return Ja/Nej.
+   */
+  boolean stopsParsing() default false;
+
   record Field(java.lang.reflect.Field field, NamedArgument annotation) {
     public String tryLongName() {
-      return !annotation().longName().isBlank() ? annotation().longName() : field().getName();
+      if (!annotation().longName().isBlank()) {
+        return annotation().longName();
+      }
+      if (tryShortName() == null) {
+        return field().getName();
+      }
+      return null;
     }
 
     public String tryShortName() {
       return !annotation().shortName().isBlank() ? annotation().shortName() : null;
+    }
+
+    public boolean isBooleanField() {
+      return (field().getType() == boolean.class || field().getType() == Boolean.class) &&
+             annotation().converter().length == 0;
     }
   }
 }

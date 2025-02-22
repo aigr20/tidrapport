@@ -11,16 +11,23 @@ public class TidrapportArguments {
   @PositionalArgument(1)
   private final String file;
 
-  @NamedArgument(longName = "debug", shortName = "d")
+  @NamedArgument(longName = "debug", shortName = "d", description = "Visa de tokens som skapats från filen.")
   private final boolean debug;
 
-  @NamedArgument(longName = "current-only")
+  @NamedArgument(longName = "current-only", description = "Visa bara denna veckan")
   private final boolean onlyCurrentWeek;
 
-  @NamedArgument(longName = "week-offset", shortName = "o")
+  @NamedArgument(longName = "week-offset",
+                 shortName = "o",
+                 description = "Justering från denna veckan, t.ex -1 visar förra veckans rapport")
   private final Integer weekOffset;
 
-  @NamedArgument(longName = "exclude-from-sum", converter = CommaSeparatedListConverter.class)
+  @NamedArgument(longName = "help", shortName = "h", stopsParsing = true)
+  private final boolean showHelp;
+
+  @NamedArgument(longName = "exclude-from-sum",
+                 converter = CommaSeparatedListConverter.class,
+                 description = "Kommaseparerad lista, t.ex lunch,rast,etc. De aktiviteter som är med i listan tas ej med när tiden summeras.")
   private final List<String> excludedFromSum;
 
   public TidrapportArguments() {
@@ -29,6 +36,7 @@ public class TidrapportArguments {
     onlyCurrentWeek = false;
     weekOffset = null;
     excludedFromSum = List.of();
+    showHelp = false;
   }
 
   public String getFile() {
@@ -49,6 +57,10 @@ public class TidrapportArguments {
 
   public Integer getWeekOffset() {
     return weekOffset;
+  }
+
+  public boolean isShowHelp() {
+    return showHelp;
   }
 
   public static class CommaSeparatedListConverter implements ArgumentConverter<List<String>> {
