@@ -30,6 +30,7 @@ public class WeekReporter implements Reporter {
   @Override
   public void report(final ReporterOptions options) {
     var weekSum = 0d;
+    final var requiredWeekSum = options.daysPerWeek() * options.hoursPerDay();
 
     System.out.println("Vecka " + week);
     reports.sort(Comparator.comparing(DayReporter::getDay));
@@ -37,7 +38,15 @@ public class WeekReporter implements Reporter {
       report.report(options);
       weekSum += report.totalMinutes(options.excludeFromSum());
     }
+    final var diffFromRequired = requiredWeekSum - weekSum;
+
     System.out.printf("Totalt vecka %d: %.2fh%n", week, weekSum);
+    if (diffFromRequired < 0) {
+      System.out.printf("%.2fh övertid.%n", Math.abs(diffFromRequired));
+    } else if (diffFromRequired > 0) {
+      System.out.printf("%.2fh timmar kvar på arbetsveckan.%n", diffFromRequired);
+    }
+    System.out.println();
   }
 
   public int getWeek() {

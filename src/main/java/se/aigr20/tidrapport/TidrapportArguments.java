@@ -14,6 +14,12 @@ public class TidrapportArguments {
   @NamedArgument(longName = "debug", shortName = "d", description = "Visa de tokens som skapats från filen.")
   private final boolean debug;
 
+  @NamedArgument(longName = "hours-per-day", description = "Hur många timmar en arbetsdag består av.")
+  private final double hoursPerDay;
+
+  @NamedArgument(longName = "days-per-week", description = "Hur många arbetsdagar en vecka består av.")
+  private final int daysPerWeek;
+
   @NamedArgument(longName = "current-only", shortName = "c", description = "Visa bara denna veckan")
   private final boolean onlyCurrentWeek;
 
@@ -34,6 +40,8 @@ public class TidrapportArguments {
     file = null;
     debug = false;
     onlyCurrentWeek = false;
+    hoursPerDay = 8d;
+    daysPerWeek = 5;
     weekOffset = null;
     excludedFromSum = List.of();
     showHelp = false;
@@ -57,6 +65,14 @@ public class TidrapportArguments {
 
   public Integer getWeekOffset() {
     return weekOffset;
+  }
+
+  public double getHoursPerDay() {
+    return hoursPerDay;
+  }
+
+  public int getDaysPerWeek() {
+    return daysPerWeek;
   }
 
   public boolean isShowHelp() {

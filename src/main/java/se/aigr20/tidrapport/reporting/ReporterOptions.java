@@ -7,9 +7,17 @@ import java.util.OptionalInt;
 
 import se.aigr20.tidrapport.TidrapportArguments;
 
-public record ReporterOptions(List<String> excludeFromSum, boolean currentWeekOnly, Integer weekOffset) {
+public record ReporterOptions(List<String> excludeFromSum,
+                              boolean currentWeekOnly,
+                              Integer weekOffset,
+                              int daysPerWeek,
+                              double hoursPerDay) {
   public ReporterOptions(final TidrapportArguments arguments) {
-    this(arguments.getExcludedFromSum(), arguments.isOnlyCurrentWeek(), arguments.getWeekOffset());
+    this(arguments.getExcludedFromSum(),
+         arguments.isOnlyCurrentWeek(),
+         arguments.getWeekOffset(),
+         arguments.getDaysPerWeek(),
+         arguments.getHoursPerDay());
   }
 
   public OptionalInt getWeekOnlyReport() {

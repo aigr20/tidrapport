@@ -28,7 +28,15 @@ public class DayReporter implements Reporter {
   public void report(final ReporterOptions options) {
     System.out.println(getDaySe());
     activities.forEach((activity, timeSpent) -> System.out.printf("%s: %.2f%n", activity, (double) timeSpent / 60));
-    System.out.printf("Totalt: %.2fh%n", totalMinutes(options.excludeFromSum()));
+    final var sum = totalMinutes(options.excludeFromSum());
+    final var diffFromDailyRequired = options.hoursPerDay() - sum;
+
+    System.out.printf("%nTotalt: %.2fh av %.2fh%n", totalMinutes(options.excludeFromSum()), options.hoursPerDay());
+    if (diffFromDailyRequired < 0) {
+      System.out.printf("%.2fh övertid.%n", Math.abs(diffFromDailyRequired));
+    } else if (diffFromDailyRequired > 0) {
+      System.out.printf("%.2fh kvar på dagen.%n", diffFromDailyRequired);
+    }
     System.out.println();
   }
 
