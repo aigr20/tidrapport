@@ -14,7 +14,7 @@ public class TidrapportArguments {
   @NamedArgument(longName = "debug", shortName = "d", description = "Visa de tokens som skapats från filen.")
   private final boolean debug;
 
-  @NamedArgument(longName = "current-only", description = "Visa bara denna veckan")
+  @NamedArgument(longName = "current-only", shortName = "c", description = "Visa bara denna veckan")
   private final boolean onlyCurrentWeek;
 
   @NamedArgument(longName = "week-offset",
