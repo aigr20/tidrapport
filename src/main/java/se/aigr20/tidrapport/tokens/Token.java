@@ -3,7 +3,7 @@ package se.aigr20.tidrapport.tokens;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-public sealed abstract class Token<T> permits Token.Activity, Token.Day, Token.Time, Token.Week {
+public abstract sealed class Token<T> permits Token.Activity, Token.Day, Token.Time, Token.Week, Token.Year {
   private final T value;
 
   public Token(T value) {
@@ -17,6 +17,12 @@ public sealed abstract class Token<T> permits Token.Activity, Token.Day, Token.T
   @Override
   public String toString() {
     return "%s{value=%s}".formatted(getClass().getSimpleName(), value);
+  }
+
+  public static final class Year extends Token<Integer> {
+    public Year(final int year) {
+      super(year);
+    }
   }
 
   public static final class Week extends Token<Integer> {

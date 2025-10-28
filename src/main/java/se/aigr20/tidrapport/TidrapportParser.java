@@ -12,6 +12,7 @@ import se.aigr20.tidrapport.parsers.ActivityParser;
 import se.aigr20.tidrapport.parsers.DayParser;
 import se.aigr20.tidrapport.parsers.TimeParser;
 import se.aigr20.tidrapport.parsers.WeekParser;
+import se.aigr20.tidrapport.parsers.YearParser;
 import se.aigr20.tidrapport.tokens.Token;
 
 public class TidrapportParser implements AutoCloseable, CharacterByCharacterReader {
@@ -19,6 +20,7 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
   private static final char ACTIVITY_DELIMITER = ':';
 
   private final Reader reader;
+  private final YearParser yearParser;
   private final WeekParser weekParser;
   private final DayParser dayParser;
   private final ActivityParser activityParser;
@@ -35,6 +37,7 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
     line = 1;
     pos = 0;
     skipWhitespace();
+    yearParser = new YearParser(this);
     weekParser = new WeekParser(this);
     dayParser = new DayParser(this);
     activityParser = new ActivityParser(this, ACTIVITY_DELIMITER);
@@ -44,7 +47,13 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
   public List<Token<?>> parse() throws IOException {
     while (true) {
       try {
-        tokens.add(weekParser.parse());
+        if (Character.toLowerCase(peek()) == 'y') {
+          tokens.add(yearParser.parse());
+          skipWhitespace();
+          tokens.add(weekParser.parse());
+        } else {
+          tokens.add(weekParser.parse());
+        }
         skipWhitespace();
         parseDaysInWeek();
       } catch (ParseException e) {
@@ -83,7 +92,7 @@ public class TidrapportParser implements AutoCloseable, CharacterByCharacterRead
       skipWhitespace();
       parseActivities();
       skipWhitespace();
-    } while (Character.toLowerCase(peek()) != 'v');
+    } while (Character.toLowerCase(peek()) != 'v' && Character.toLowerCase(peek()) != 'y');
   }
 
   private void parseActivities() throws IOException, ParseException {

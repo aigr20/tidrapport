@@ -3,7 +3,7 @@ package se.aigr20.tidrapport.reporting;
 import java.time.LocalDate;
 import java.time.temporal.IsoFields;
 import java.util.List;
-import java.util.OptionalInt;
+import java.util.Optional;
 
 import se.aigr20.tidrapport.TidrapportArguments;
 
@@ -20,15 +20,22 @@ public record ReporterOptions(List<String> excludeFromSum,
          arguments.getHoursPerDay());
   }
 
-  public OptionalInt getWeekOnlyReport() {
-    final var currentWeek = LocalDate.now().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+  public Optional<YearWeekPair> getWeekOnlyReport() {
+    final var now = LocalDate.now();
 
     if (currentWeekOnly()) {
-      return OptionalInt.of(currentWeek);
+      return Optional.of(YearWeekPair.ofLocalDate(now));
     }
     if (weekOffset != null) {
-      return OptionalInt.of(currentWeek + weekOffset());
+      final var dayOffset = weekOffset() * 7;
+      return Optional.of(YearWeekPair.ofLocalDate(now.plusDays(dayOffset)));
     }
-    return OptionalInt.empty();
+    return Optional.empty();
+  }
+
+  public record YearWeekPair(int year, int week) {
+    public static YearWeekPair ofLocalDate(final LocalDate date) {
+      return new YearWeekPair(date.getYear(), date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+    }
   }
 }
