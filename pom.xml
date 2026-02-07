@@ -33,7 +33,7 @@
                             <manifest>
                                 <addClasspath>true</addClasspath>
                                 <classpathPrefix>lib/</classpathPrefix>
-                                <mainClass>se.aigr20.tidrapport.Tidrapport</mainClass>
+                                <mainClass>se.aigr20.tidrapport.TidrapportRunner</mainClass>
                             </manifest>
                         </archive>
                     </configuration>

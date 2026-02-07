@@ -1,4 +1,4 @@
-package se.aigr20.tidrapport;
+package se.aigr20.tidrapport.parse;
 
 public class ParseException extends Exception {
   public ParseException(String message) {
