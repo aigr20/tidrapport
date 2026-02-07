@@ -1,4 +1,4 @@
-package se.aigr20.tidrapport;
+package se.aigr20.tidrapport.cli;
 
 import java.time.DayOfWeek;
 import java.time.Duration;

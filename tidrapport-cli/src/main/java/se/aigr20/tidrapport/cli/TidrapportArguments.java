@@ -1,4 +1,4 @@
-package se.aigr20.tidrapport;
+package se.aigr20.tidrapport.cli;
 
 import java.util.Arrays;
 import java.util.List;
