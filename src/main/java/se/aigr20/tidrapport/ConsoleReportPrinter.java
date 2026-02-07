@@ -24,7 +24,6 @@ public class ConsoleReportPrinter {
     for (final DayReport dayReport : report.days()) {
       printDay(dayReport);
       System.out.println();
-      System.out.println();
     }
 
     System.out.printf("Totalt vecka %d: %.2fh av %.2fh%n",
@@ -32,9 +31,9 @@ public class ConsoleReportPrinter {
                       hours(report.total()),
                       hours(report.required()));
     if (report.difference().isPositive()) {
-      System.out.printf("%.2fh kvar på arbetsveckan", hours(report.difference()));
+      System.out.printf("%.2fh kvar på arbetsveckan%n", hours(report.difference()));
     } else {
-      System.out.printf("%.2fh övertid", hours(report.difference().abs()));
+      System.out.printf("%.2fh övertid%n", hours(report.difference().abs()));
     }
   }
 
@@ -48,9 +47,9 @@ public class ConsoleReportPrinter {
 
     System.out.printf("Totalt: %.2fh av %.2fh%n", hours(report.total()), hours(report.required()));
     if (report.difference().isPositive()) {
-      System.out.printf("%.2fh kvar på dagen", hours(report.difference()));
+      System.out.printf("%.2fh kvar på dagen%n", hours(report.difference()));
     } else {
-      System.out.printf("%.2fh övertid", hours(report.difference().abs()));
+      System.out.printf("%.2fh övertid%n", hours(report.difference().abs()));
     }
   }
 
