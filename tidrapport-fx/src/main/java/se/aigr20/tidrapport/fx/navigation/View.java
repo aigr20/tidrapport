@@ -1,7 +1,8 @@
 package se.aigr20.tidrapport.fx.navigation;
 
 public enum View implements NavigationConstant {
-  START("start.fxml");
+  REPORT("report.fxml"),
+  SETTINGS("settings-dialog.fxml");
 
   private final String fxmlFile;
 

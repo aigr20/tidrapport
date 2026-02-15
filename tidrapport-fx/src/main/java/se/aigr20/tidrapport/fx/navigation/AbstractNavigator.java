@@ -5,7 +5,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import se.aigr20.tidrapport.fx.navigation.trait.ControllerTrait;
+import se.aigr20.tidrapport.fx.navigation.trait.CreatesReports;
 import se.aigr20.tidrapport.fx.navigation.trait.NavigationTrait;
+import se.aigr20.tidrapport.fx.navigation.trait.SettingsAccessTrait;
+import se.aigr20.tidrapport.fx.report.ReportService;
+import se.aigr20.tidrapport.fx.settings.SettingsService;
 
 public class AbstractNavigator {
   private static final Map<Class<? extends ControllerTrait>, Object> CONTROLLER_OBJECTS =
@@ -49,6 +53,10 @@ public class AbstractNavigator {
       switch (controller) {
         case NavigationTrait navigationCapabilities when traitClass == NavigationTrait.class ->
                 navigationCapabilities.setNavigator((StageNavigator) grantedByTrait);
+        case SettingsAccessTrait configurationAccess when traitClass == SettingsAccessTrait.class ->
+                configurationAccess.setSettingsService((SettingsService) grantedByTrait);
+        case CreatesReports createsReports when traitClass == CreatesReports.class ->
+                createsReports.setReportService((ReportService) grantedByTrait);
         default -> throw new IllegalStateException("Unhandled controller trait: " +
                                                    traitClass.getName());
       }
