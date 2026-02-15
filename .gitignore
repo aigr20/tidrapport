@@ -2,3 +2,6 @@ target
 *.iml
 .idea
 tidrapport-demo.txt
+.project
+.settings
+.classpath
