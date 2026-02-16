@@ -174,7 +174,7 @@ public class Lexer implements AutoCloseable, Iterable<Token> {
   }
 
   private boolean isWordChar(final char c) {
-    return Character.isLetterOrDigit(c);
+    return Character.isLetterOrDigit(c) || c == '-';
   }
 
   private char advance() throws IOException {
