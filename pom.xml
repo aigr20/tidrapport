@@ -12,14 +12,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <jackson.version>2.20.0</jackson.version>
-        <javafx.version>21.0.6</javafx.version>
-        <junit.version>5.11.3</junit.version>
+        <jackson.version>2.21.0</jackson.version>
+        <javafx.version>25.0.2</javafx.version>
+        <junit.version>6.0.3</junit.version>
 
-        <compiler-plugin.version>3.13.0</compiler-plugin.version>
-        <surefire-plugin.version>3.3.1</surefire-plugin.version>
-        <jar-plugin.version>3.4.1</jar-plugin.version>
-        <assembly-plugin.version>3.7.1</assembly-plugin.version>
+        <compiler-plugin.version>3.15.0</compiler-plugin.version>
+        <surefire-plugin.version>3.5.4</surefire-plugin.version>
+        <jar-plugin.version>3.5.0</jar-plugin.version>
+        <assembly-plugin.version>3.8.0</assembly-plugin.version>
         <javafx-plugin.version>0.0.8</javafx-plugin.version>
     </properties>
 
@@ -39,8 +39,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${compiler-plugin.version}</version>
                     <configuration>
-                        <source>21</source>
-                        <target>21</target>
+                        <release>25</release>
                     </configuration>
                 </plugin>
                 <plugin>
