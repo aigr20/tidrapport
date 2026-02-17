@@ -183,6 +183,7 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
       final int selectedWeek = lastSelectedWeek != null && weeks.contains(lastSelectedWeek) ?
                                lastSelectedWeek :
                                weeks.getLast();
+      weekSelector.setValue(null);
       weekSelector.setValue(selectedWeek);
     });
     Thread.ofVirtual().start(task);
