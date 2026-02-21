@@ -11,6 +11,7 @@ import se.aigr20.tidrapport.fx.settings.TidrapportSettings;
 import se.aigr20.tidrapport.lex.Lexer;
 import se.aigr20.tidrapport.model.Tidrapport;
 import se.aigr20.tidrapport.model.YearReport;
+import se.aigr20.tidrapport.parse.ParseException;
 import se.aigr20.tidrapport.parse.TidrapportParser;
 import se.aigr20.tidrapport.reporting.ReportBuilder;
 
@@ -32,7 +33,12 @@ public class ReportService {
         try (final Reader reader = Files.newBufferedReader(file);
              final Lexer lexer = new Lexer(reader)) {
           final TidrapportParser parser = new TidrapportParser(lexer);
-          cached = parser.parse();
+          try {
+            cached = parser.parse();
+          } catch (final ParseException e) {
+            cached = parser.getParsedTidrapport();
+            throw e;
+          }
         }
         return true;
       }

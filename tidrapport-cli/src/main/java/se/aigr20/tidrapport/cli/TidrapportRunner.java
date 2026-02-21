@@ -14,6 +14,7 @@ import se.aigr20.tidrapport.model.Tidrapport;
 import se.aigr20.tidrapport.model.WeekReport;
 import se.aigr20.tidrapport.model.YearReport;
 import se.aigr20.tidrapport.parse.TidrapportParser;
+import se.aigr20.tidrapport.parse.ParseException;
 import se.aigr20.tidrapport.reporting.ReportBuilder;
 
 public class TidrapportRunner {
@@ -26,36 +27,51 @@ public class TidrapportRunner {
       return;
     }
 
-    final Tidrapport tidrapport;
+    ParseException parseException = null;
+    Tidrapport tidrapport;
     try (Reader reader = Files.newBufferedReader(Path.of(arguments.getFile()));
          Lexer lexer = new Lexer(reader)) {
       final TidrapportParser parser = new TidrapportParser(lexer);
-      tidrapport = parser.parse();
+      try {
+        tidrapport = parser.parse();
+      } catch (final ParseException e) {
+        tidrapport = parser.getParsedTidrapport();
+        parseException = e;
+      }
     }
 
     final long minutesPerDay = (long) (arguments.getHoursPerDay() * 60);
     final ReportBuilder reportBuilder = new ReportBuilder(Duration.ofMinutes(minutesPerDay),
                                                           arguments.getDaysPerWeek(),
-                                                          new HashSet<>(arguments.getExcludedFromSum()));
+                                                          new HashSet<>(arguments
+                                                                  .getExcludedFromSum()));
 
     if (arguments.isOnlyCurrentWeek()) {
       final YearWeekPair yearWeekPair = YearWeekPair.ofLocalDate(LocalDate.now());
-      final WeekReport report = reportBuilder.createReportForWeek(tidrapport,
-                                                                  yearWeekPair.year(),
-                                                                  yearWeekPair.week());
+      final WeekReport report = reportBuilder
+              .createReportForWeek(tidrapport, yearWeekPair.year(), yearWeekPair.week());
       new ConsoleReportPrinter().printWeek(report);
     } else if (arguments.getWeekOffset() != null) {
       final YearWeekPair yearWeekPair = YearWeekPair.ofLocalDate(LocalDate.now());
-      final WeekReport report = reportBuilder.createReportForWeek(tidrapport,
-                                                                  yearWeekPair.year(),
-                                                                  yearWeekPair.week() +
-                                                                  arguments.getWeekOffset());
+      final WeekReport report = reportBuilder
+              .createReportForWeek(tidrapport,
+                                   yearWeekPair.year(),
+                                   yearWeekPair.week() + arguments.getWeekOffset());
       new ConsoleReportPrinter().printWeek(report);
     } else {
       for (final int year : tidrapport.years().keySet()) {
         final YearReport report = reportBuilder.createReportForYear(tidrapport, year);
         new ConsoleReportPrinter().printYear(report);
       }
+    }
+
+    if (parseException != null) {
+      System.out.println("""
+                         Ett parsingfel uppstod. \
+                         Rapporten ovan är den som kunde \
+                         parsas till dess att felet uppstod.
+                         """);
+      System.out.println(parseException);
     }
   }
 

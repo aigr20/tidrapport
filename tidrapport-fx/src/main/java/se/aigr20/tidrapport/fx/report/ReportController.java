@@ -43,8 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ReportController implements NavigationTrait, StageAccessTrait, SettingsAccessTrait,
-        CreatesReports {
+public class ReportController implements NavigationTrait, StageAccessTrait, SettingsAccessTrait, CreatesReports {
 
   private StageNavigator navigator;
   private SettingsService settings;
@@ -64,8 +63,8 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
   private Button closeFileBtn;
   @FXML
   private Text statusContent;
-  private final ObservableList<Integer> availableWeeks =
-          FXCollections.observableList(new ArrayList<>());
+  private final ObservableList<Integer> availableWeeks = FXCollections
+          .observableList(new ArrayList<>());
 
   private Year lastSelectedYear;
   private Integer lastSelectedWeek;
@@ -113,9 +112,8 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
 
   @FXML
   public void reload() {
-    final Task<Boolean> task = reportService.loadFile(Path.of(settings
-                                                                      .getCurrent()
-                                                                      .tidrapportFilePath()));
+    final Task<Boolean> task = reportService
+            .loadFile(Path.of(settings.getCurrent().tidrapportFilePath()));
     task.setOnSucceeded(event -> {
       yearSelector.getItems().setAll(reportService.getAvailableYears());
       yearSelector.setValue(yearSelector.getItems().getLast());
@@ -166,10 +164,10 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
       loadYear(lastSelectedYear);
     }
   }
-  
+
   @FXML
   public void exitProgram() {
-	  stage.close();
+    stage.close();
   }
 
   private void loadYear(final Year year) {
@@ -181,8 +179,8 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
       weekSelector.getItems().setAll(weeks);
 
       final int selectedWeek = lastSelectedWeek != null && weeks.contains(lastSelectedWeek) ?
-                               lastSelectedWeek :
-                               weeks.getLast();
+              lastSelectedWeek :
+              weeks.getLast();
       weekSelector.setValue(null);
       weekSelector.setValue(selectedWeek);
     });
@@ -199,8 +197,7 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
             .stream()
             .filter(item -> item.week() == week)
             .findFirst()
-            .orElseThrow(() -> new IllegalStateException(
-                    "En vecka som inte finns i årsrapporten blev vald"));
+            .orElseThrow(() -> new IllegalStateException("En vecka som inte finns i årsrapporten blev vald"));
     TreeItem<ReportRow> root = new TreeItem<>();
     root.setExpanded(true);
 
@@ -219,29 +216,24 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
     weekTable.setRoot(root);
     weekTable.setShowRoot(false);
 
-    statusContent.setText("Vecka %d: %.2fh/%.2fh (%.2fh kvar)%n".formatted(report.week(),
-                                                                           hours(report.total()),
-                                                                           hours(report.required()),
-                                                                           hours(report.difference())));
+    statusContent
+            .setText("Vecka %d: %.2fh/%.2fh (%.2fh kvar)%n"
+                    .formatted(report.week(),
+                               hours(report.total()),
+                               hours(report.required()),
+                               hours(report.difference())));
   }
 
   private void openTidrapportFile(final Path file) {
     final Task<Boolean> task = reportService.loadFile(file);
-    task.setOnSucceeded(event -> {
-      final Task<Void> saveTask = settings.saveSettings(settings
-                                                                .getCurrent()
-                                                                .withTidrapportFilePath(file.toString()));
-      yearSelector.getItems().setAll(reportService.getAvailableYears());
-      yearSelector.setValue(yearSelector.getItems().getLast());
-
-      Thread.ofVirtual().start(saveTask);
-    });
-    task.setOnFailed(event -> {
+    task.setOnSucceeded(_ -> handleFileSelected(file));
+    task.setOnFailed(_ -> {
       final Throwable exception = task.getException();
       final Alert errorAlert = new Alert(AlertType.ERROR);
       if (exception instanceof final ParseException parseException) {
         errorAlert.setHeaderText("Parsefel");
         errorAlert.setContentText(parseException.getMessage());
+        handleFileSelected(file);
       } else {
         errorAlert.setHeaderText("Okänt fel");
         errorAlert.setContentText(exception.getMessage());
@@ -251,6 +243,15 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
     });
 
     Thread.ofVirtual().start(task);
+  }
+
+  private void handleFileSelected(final Path selectedFile) {
+    final Task<Void> saveTask = settings
+            .saveSettings(settings.getCurrent().withTidrapportFilePath(selectedFile.toString()));
+    yearSelector.getItems().setAll(reportService.getAvailableYears());
+    yearSelector.setValue(yearSelector.getItems().getLast());
+
+    Thread.ofVirtual().start(saveTask);
   }
 
   private void initializeTableColumns() {
@@ -266,10 +267,11 @@ public class ReportController implements NavigationTrait, StageAccessTrait, Sett
 
   private TreeTableColumn<ReportRow, String> createNameColumn() {
     final TreeTableColumn<ReportRow, String> nameColumn = new TreeTableColumn<>("Dag");
-    nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features
-                                                                                .getValue()
-                                                                                .getValue()
-                                                                                .getLabel()));
+    nameColumn
+            .setCellValueFactory(features -> new SimpleStringProperty(features
+                    .getValue()
+                    .getValue()
+                    .getLabel()));
     nameColumn.setCellFactory(col -> new DayAndActivityCell(settings.getSettings()));
 
     return nameColumn;

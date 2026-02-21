@@ -14,19 +14,30 @@ import se.aigr20.tidrapport.model.Year;
 
 public class TidrapportParser {
   private final TokenStream tokens;
+  private Tidrapport tidrapport;
 
   public TidrapportParser(final Lexer lexer) {
     this.tokens = lexer.stream();
   }
 
   public Tidrapport parse() throws ParseException {
-    final Tidrapport tidrapport = new Tidrapport();
+    tidrapport = new Tidrapport();
 
     while (!tokens.match(Token.Type.EOF)) {
       parseYear(tidrapport);
       skipNewLines();
     }
 
+    return tidrapport;
+  }
+
+  /**
+   * Ger tidrapporten som parsats. Uppstod ett parsefel kan man få ut den rapport som var parsar
+   * fram till att felet uppstod.
+   * 
+   * @return Tidrapport. Antingen helt parsad eller delvis.
+   */
+  public Tidrapport getParsedTidrapport() {
     return tidrapport;
   }
 
